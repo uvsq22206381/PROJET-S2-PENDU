@@ -70,15 +70,17 @@ def sélection_thème(event):     ##fonction qui permet de retourner le thème d
     combo_long.current(0)
     
 def sélection_long(event):       #fonction qui permet de retourner la longueur du mot choisi par l'utilisateur
-    global longueur    
+    global longueur  
     longueur = combo_long.get()
-
+    
+    
 def transition():       #transition vers le jeu principal
     global jeu
     menu.destroy()
     jeu = tk.Frame(racine, bg="#282828")
     jeu.pack(pady=30)
     cadre_pendu()
+    mot_caché()
 
 def cadre_pendu():          #crée le cadre dans lequel se formera le pendu
     global dessin_pendu
@@ -86,22 +88,14 @@ def cadre_pendu():          #crée le cadre dans lequel se formera le pendu
     dessin_pendu.pack(side ="top", fill='y', expand = True)
 
 def mot_caché():        #génère le mot aléatoire qu'il faudra deviner
+    global Mot, Mot_séparé
     Mot = ''
-    while len(Mot) != int(longueur):  
-        Mot = rd.choice(thème)
-    Mot_séparé = [x for x in Mot]        
+    while len(Mot) != int(longueur):
+        Mot = rd.choice(themes[thème])    
+    Mot_séparé = [x for x in Mot]
     
 menu_principal()
-
 racine.mainloop()
-
-
-
-
-
-
-
-
 
 
 
