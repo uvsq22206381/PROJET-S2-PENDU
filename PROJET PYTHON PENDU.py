@@ -85,7 +85,7 @@ def transition():       #transition vers le jeu principal
 
 def cadre_pendu():          #crée le cadre dans lequel se formera le pendu
     global dessin_pendu
-    dessin_pendu = tk.Canvas(jeu, bg ='white', width = 370, height = 370)
+    dessin_pendu = tk.Canvas(jeu, bg ='white', width = 400, height = 400)
     dessin_pendu.pack(side ="top")
 
 def mot_caché():        #génère le mot aléatoire qu'il faudra deviner
@@ -93,9 +93,9 @@ def mot_caché():        #génère le mot aléatoire qu'il faudra deviner
     Mot = ''
     while len(Mot) != int(longueur):
         Mot = rd.choice(themes[thème])
+    Mot_séparé = [x.upper() for x in Mot]
 
 #étapes du dessin du pendu
-
 def etape1():                           #Dessin de la potence
 
         dessin_pendu.create_line((80,360),(320,360), fill = 'black', width = 5)
@@ -132,21 +132,20 @@ def etape8():                           #Dessin du visage du pendu
         dessin_pendu.create_oval((248,92),(256, 100), fill = 'black', width = 2)
         dessin_pendu.create_line((222, 124),(240,112),(259,124), fill = 'black', width = 5)
 
-#Fin des étapes de dessin du pendu
-
 def dessin_mot():                   #Dessine les traits du mots qu'il faudra deviner
+    global List_dash
     dessin = tk.Frame(jeu, bg = "LightGoldenrod2", width = 550, height = 100, highlightbackground= 'midnightblue', bd= 10, relief = 'raised')
     dessin.pack(pady=30, anchor = 'center')
     List_dash = tk.Label(jeu, text = ' '.join(["_" if letter!= ' ' else ' ' for letter in Mot]), font = ('helvetica', 50), fg = 'black', bg ='LightGoldenrod2')
     List_dash.place(in_=dessin, relx =0.5, rely = 0.5, anchor = 'center')
 
-def clavier_lettres():              #Fonction qui construit le clavier qui permettra à l'utilisateur d'essayer de deviner les lettres
+def clavier_lettres():
     clavier = tk.Frame(jeu, bg="#282828", bd = 2, relief = 'sunken')
-    clavier.pack(pady = 15, anchor = 'center')
+    clavier.pack(pady = 0, anchor = 'center')
     letters = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
     buttons = []
     for letter in letters:
-            button = tk.Button(clavier, text=letter, font=("Helvetica", 18), bg="#333333", width=3, height=1)
+            button = tk.Button(clavier, text=letter, font=("Helvetica", 18), bg="#333333", command = lambda letter = letter: lettre_check(letter), width=3, height=1)
             buttons.append(button)
     for i in range(12):
         buttons[i].grid(row = 0, column = i)
@@ -154,6 +153,27 @@ def clavier_lettres():              #Fonction qui construit le clavier qui perme
         buttons[12+i].grid(row = 1, column = i+2)
     for i in range(6):
         buttons[20+i].grid(row = 2, column = i+3)
+
+def lettre_check(lettre):             #Fonction qui vérifie si la lettre choisie appartient au mot
+    if lettre in Mot_séparé:
+        affichage_lettre(lettre)
+    else:
+         affichage_pendu()
+        
+def affichage_lettre(lettre):            #Fonction qui affiche une lettre correctement choisie
+    global nouveau_texte
+    for i in range(len(Mot_séparé)):   
+        if Mot_séparé[i] == lettre:
+            nouveau_texte = List_dash.cget('text')[:2*i]+ lettre + List_dash.cget('text')[2*i+1:]
+            List_dash.config(text = nouveau_texte)
+
+echec = 0
+def affichage_pendu():                  #Fonction qui affiche les membres du pendu
+    global echec, Etapes
+    Etapes = [etape1, etape2, etape3, etape4, etape5, etape6, etape7, etape8]
+    Etapes[echec]()
+    echec +=1
+    
 
 menu_principal()
 racine.mainloop()
