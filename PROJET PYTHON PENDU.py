@@ -82,7 +82,19 @@ def transition():       #transition vers le jeu principal
     mot_caché()
     dessin_mot()
     clavier_lettres()
-
+    nouvelle_partie()
+        
+def nouvelle_partie():          #permet de générer une nouvelle partie
+    global guesses, wrong_guesses, right_guesses
+    dessin_pendu.delete('all')
+    wrong_guesses= 0
+    guesses = 0
+    mot_caché()
+    right_guesses = list(set(Mot_séparé))
+    List_dash.config(text = ' '.join(["_" if letter!= ' ' else ' ' for letter in Mot]))
+    for button in buttons:
+        button.config(state = 'normal', relief = 'raised', bg = "#333333")
+         
 def cadre_pendu():          #crée le cadre dans lequel se formera le pendu
     global dessin_pendu
     dessin_pendu = tk.Canvas(jeu, bg ='white', width = 400, height = 400)
@@ -94,6 +106,29 @@ def mot_caché():        #génère le mot aléatoire qu'il faudra deviner
     while len(Mot) != int(longueur):
         Mot = rd.choice(themes[thème])
     Mot_séparé = [x.upper() for x in Mot]
+    
+def dessin_mot():                   #Dessine les traits du mots qu'il faudra deviner
+    global List_dash
+    dessin = tk.Frame(jeu, bg = "LightGoldenrod2", width = 550, height = 100, highlightbackground= 'midnightblue', bd= 10, relief = 'raised')
+    dessin.pack(pady=30, anchor = 'center')
+    List_dash = tk.Label(jeu, text = ' '.join(["_" if letter!= ' ' else ' ' for letter in Mot]), font = ('helvetica', 50), fg = 'black', bg ='LightGoldenrod2')
+    List_dash.place(in_=dessin, relx =0.5, rely = 0.5, anchor = 'center')
+
+def clavier_lettres():          #construit un clavier contenant des boutons pour chacune des 26 lettres de l'alphabet 
+    global alphabet, buttons
+    clavier = tk.Frame(jeu, bg="#282828", bd = 2, relief = 'sunken')
+    clavier.pack(pady = 0, anchor = 'center')
+    alphabet = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+    buttons = []
+    for letter in alphabet:
+            button = tk.Button(clavier, text=letter, font=("Helvetica", 18), bg="#333333", command = lambda letter = letter: lettre_check(letter), width=3, height=1 ,relief = 'raised')
+            buttons.append(button)
+    for i in range(12):
+        buttons[i].grid(row = 0, column = i)
+    for i in range(8):
+        buttons[12+i].grid(row = 1, column = i+2)
+    for i in range(6):
+        buttons[20+i].grid(row = 2, column = i+3)
 
 #étapes du dessin du pendu
 def etape1():                           #Dessin de la potence
@@ -132,33 +167,18 @@ def etape8():                           #Dessin du visage du pendu
         dessin_pendu.create_oval((248,92),(256, 100), fill = 'black', width = 2)
         dessin_pendu.create_line((222, 124),(240,112),(259,124), fill = 'black', width = 5)
 
-def dessin_mot():                   #Dessine les traits du mots qu'il faudra deviner
-    global List_dash
-    dessin = tk.Frame(jeu, bg = "LightGoldenrod2", width = 550, height = 100, highlightbackground= 'midnightblue', bd= 10, relief = 'raised')
-    dessin.pack(pady=30, anchor = 'center')
-    List_dash = tk.Label(jeu, text = ' '.join(["_" if letter!= ' ' else ' ' for letter in Mot]), font = ('helvetica', 50), fg = 'black', bg ='LightGoldenrod2')
-    List_dash.place(in_=dessin, relx =0.5, rely = 0.5, anchor = 'center')
-
-def clavier_lettres():
-    clavier = tk.Frame(jeu, bg="#282828", bd = 2, relief = 'sunken')
-    clavier.pack(pady = 0, anchor = 'center')
-    letters = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
-    buttons = []
-    for letter in letters:
-            button = tk.Button(clavier, text=letter, font=("Helvetica", 18), bg="#333333", command = lambda letter = letter: lettre_check(letter), width=3, height=1)
-            buttons.append(button)
-    for i in range(12):
-        buttons[i].grid(row = 0, column = i)
-    for i in range(8):
-        buttons[12+i].grid(row = 1, column = i+2)
-    for i in range(6):
-        buttons[20+i].grid(row = 2, column = i+3)
-
 def lettre_check(lettre):             #Fonction qui vérifie si la lettre choisie appartient au mot
+    global nouveau, guesses
+    guesses += 1
     if lettre in Mot_séparé:
+        right_guesses.remove(lettre)
         affichage_lettre(lettre)
+        buttons[alphabet.index(lettre)].config(relief= 'sunken', bg="#93C572", state="disabled")
+        victoire()
     else:
-         affichage_pendu()
+        affichage_pendu()
+        buttons[alphabet.index(lettre)].config(relief= 'sunken', bg="#FF5252", state="disabled")
+        défaite()
         
 def affichage_lettre(lettre):            #Fonction qui affiche une lettre correctement choisie
     global nouveau_texte
@@ -167,31 +187,28 @@ def affichage_lettre(lettre):            #Fonction qui affiche une lettre correc
             nouveau_texte = List_dash.cget('text')[:2*i]+ lettre + List_dash.cget('text')[2*i+1:]
             List_dash.config(text = nouveau_texte)
 
-echec = 0
-def affichage_pendu():                  #Fonction qui affiche les membres du pendu
-    global echec, Etapes
+def affichage_pendu():                 #Fonction qui affiche les membres du pendu
+    global wrong_guesses, Etapes
     Etapes = [etape1, etape2, etape3, etape4, etape5, etape6, etape7, etape8]
-    Etapes[echec]()
-    echec +=1
-    
+    Etapes[wrong_guesses]()
+    wrong_guesses +=1
+
+def défaite():                          #Fonction qui affiche un message lorsque le joueur a perdu et lui demande s'il veut rejouer
+   if wrong_guesses == len(Etapes):
+        resultat = messagebox.askquestion("Défaite", "Vous avez perdu! Le bon mot était " + Mot.upper() + ".\nSouhaitez-vous rejouer?")
+        if resultat == messagebox.YES:
+             nouvelle_partie()
+        else:
+             racine.destroy()
+
+def victoire():                         #Fonction qui affiche un message de victoire au joueur et lui demande s'il veut rejouer
+    if right_guesses == []:
+        resultat = messagebox.askquestion("Victoire", "Bien Joué, vous avez trouvé le mot et sauvé le pendu!\nSouhaitez-vous rejouer?")
+        if resultat == messagebox.YES:
+             nouvelle_partie()
+        else:
+             racine.destroy()
 
 menu_principal()
 racine.mainloop()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
