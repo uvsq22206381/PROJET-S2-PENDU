@@ -5,9 +5,27 @@ from tkinter import messagebox
 
 # création d'une liste de mots à deviner
 
-themes   =    {'Animaux': ['chien', 'chat', 'lion', 'tigre', 'elephant'],
+themes   =    {'Animaux': ['chien', 'chat', 'lion', 'tigre', 'éléphant'],
                'Fruits': ['pomme', 'banane', 'orange', 'kiwi', 'mangue'],
                'Couleurs': ['rouge', 'bleu', 'vert', 'jaune', 'violet']}
+
+dict_accents =  {
+        'à': 'a',
+        'â': 'a',
+        'ä': 'a',
+        'ç': 'c',
+        'é': 'e',
+        'è': 'e',
+        'ê': 'e',
+        'ë': 'e',
+        'î': 'i',
+        'ï': 'i',
+        'ô': 'o',
+        'ö': 'o',
+        'ù': 'u',
+        'û': 'u',
+        'ü': 'u',
+    }
 
 
 #création de l'interface du jeu
@@ -92,7 +110,7 @@ def nouvelle_partie():          #permet de générer une nouvelle partie
     wrong_guesses= 0
     guesses = 0
     mot_caché()
-    right_guesses = list(set(Mot_séparé))
+    right_guesses = list(set(mot_séparé_normal))
     List_dash.config(text = ' '.join(["_" if letter!= ' ' else ' ' for letter in Mot]))
     for button in buttons:
         button.config(state = 'normal', relief = 'raised', bg = "#333333")
@@ -108,7 +126,17 @@ def mot_caché():        #génère le mot aléatoire qu'il faudra deviner
     while len(Mot) != int(longueur):
         Mot = rd.choice(themes[thème])
     Mot_séparé = [x.upper() for x in Mot]
-    
+    normalisation_mot()
+
+def normalisation_mot():
+    global mot_séparé_normal
+    mot_séparé_normal = []
+    for x in Mot_séparé:
+        if x.lower() in dict_accents:
+            mot_séparé_normal.append((dict_accents.get(x.lower())).upper())
+        else:
+            mot_séparé_normal.append(x.upper())
+
 def dessin_mot():                   #Dessine les traits du mots qu'il faudra deviner
     global List_dash
     dessin = tk.Frame(jeu, bg = "LightGoldenrod2", width = 550, height = 100, highlightbackground= 'midnightblue', bd= 10, relief = 'raised')
@@ -176,7 +204,7 @@ def etape8():                           #Dessin du visage du pendu
 def lettre_check(lettre):             #Fonction qui vérifie si la lettre choisie appartient au mot
     global nouveau, guesses
     guesses += 1
-    if lettre in Mot_séparé:
+    if lettre in mot_séparé_normal:
         right_guesses.remove(lettre)
         affichage_lettre(lettre)
         buttons[alphabet.index(lettre)].config(relief= 'sunken', bg="#93C572", state="disabled")
@@ -188,9 +216,9 @@ def lettre_check(lettre):             #Fonction qui vérifie si la lettre choisi
         
 def affichage_lettre(lettre):            #Fonction qui affiche une lettre correctement choisie
     global nouveau_texte
-    for i in range(len(Mot_séparé)):   
-        if Mot_séparé[i] == lettre:
-            nouveau_texte = List_dash.cget('text')[:2*i]+ lettre + List_dash.cget('text')[2*i+1:]
+    for i in range(len(mot_séparé_normal)):   
+        if mot_séparé_normal[i] == lettre:
+            nouveau_texte = List_dash.cget('text')[:2*i]+ Mot_séparé[i]+ List_dash.cget('text')[2*i+1:]
             List_dash.config(text = nouveau_texte)
 
 def affichage_pendu():                 #Fonction qui affiche les membres du pendu
@@ -217,4 +245,4 @@ def victoire():                         #Fonction qui affiche un message de vict
 
 menu_principal()
 racine.mainloop()
-
+print(mot_séparé_normal)
