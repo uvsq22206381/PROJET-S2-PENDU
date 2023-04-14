@@ -83,6 +83,8 @@ def transition():       #transition vers le jeu principal
     dessin_mot()
     clavier_lettres()
     nouvelle_partie()
+    jeu.focus_set()
+    jeu.bind("<KeyPress>", clavier_ordi)
         
 def nouvelle_partie():          #permet de générer une nouvelle partie
     global guesses, wrong_guesses, right_guesses
@@ -129,6 +131,10 @@ def clavier_lettres():          #construit un clavier contenant des boutons pour
         buttons[12+i].grid(row = 1, column = i+2)
     for i in range(6):
         buttons[20+i].grid(row = 2, column = i+3)
+
+def clavier_ordi(event):                     #vérifie si la lettre tapée sur l'ordinateur est bien dans le mot
+    if event.char.upper() in alphabet:
+        lettre_check(event.char.upper())
 
 #étapes du dessin du pendu
 def etape1():                           #Dessin de la potence
