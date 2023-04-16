@@ -1,0 +1,17 @@
+Voici notre version du jeu de pendu.
+Le but du jeu est simple : deviner toute les lettres qui doivent composer un mot, éventuellement avec un nombre limité de tentatives et des thèmes fixés à l’avance. 
+A chaque fois que le joueur devine une lettre, celle-ci est affichée. Dans le cas contraire, le dessin d’un pendu se met à apparaître…
+
+Chrono
+Testez votre rapidité dans une course contre la montre!
+Vous avez 2 minutes pour tenter de deviner le maximum de mots possibles.
+
+
+Infini
+Un bon évaluateur de votre connaissance linguistique!
+Tentez de deviner un maximum de mots possibles, un mot non deviné et c'est perdu :(
+
+
+Normal
+Pour les plus pressés!
+Choisissez les paramètres du mot à deviner et admirez la beauté de notre travail incroyable.
