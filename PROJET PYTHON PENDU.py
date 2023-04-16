@@ -79,18 +79,24 @@ def chrono():               #création du chronomètre
     temps = 120
     texte_tps = tk.StringVar()
     texte_tps.set("02:00")
-    cercle = tk.Canvas(jeu, width=280, height=280, bg="#0A1931", bd=0, highlightthickness=0)
-    cercle.place(relx = 0.2, rely = 0.3, anchor= 'center')
-    cercle.create_oval((10, 10),(270, 270), outline="#F5A623", width=10)
-    tps = tk.Label(cercle, textvariable=texte_tps, font=("Arial", 80, "bold"), bg="#0A1931", fg="#F5A623")
+    cercle = tk.Canvas(jeu, width=255, height=255, bg="#282828", bd=0, highlightthickness=0)
+    cercle.place(relx = 0.17, rely = 0.3, anchor= 'center')
+    cercle.create_oval((10, 10),(250, 250), outline="#F5A623", width=10)
+    tps = tk.Label(cercle, textvariable=texte_tps, font=("Arial", 75, "bold"), bg="#282828", fg="#F5A623")
     tps.place(relx=0.5, rely=0.5, anchor="center")
 
 def passage_temps():        #passage du temps au chrono
+    global temps, score
     temps -= 1
     minutes, seconds = temps//60, temps%60
     texte_tps.set(f"{minutes:02d}:{seconds:02d}")
     if temps == 0:
-        pass
+        resultat = messagebox.askquestion("le temps est écoulé!, Vous avez réussi à sauver le pendu" + str(score) + "fois!\nSouhaitez-vous rejouer?")
+        if resultat == messagebox.YES:
+            particularités_mode()
+        else:
+             racine.destroy()
+        
     else:
         racine.after(1000, passage_temps)
 
@@ -124,7 +130,7 @@ def instructions_mode(button):      #fonction qui permet de lire et d'afficher l
   paramètres_modes()
   texte_instructions.config(text = instr_mode)
 
-def affich_combo():
+def affich_combo():         #fonction qui affiche les paramètres du mode normal
   choisir_theme.place(relx = 0.3, rely = 0.1, anchor = 'center')
   combo_themes.place(relx= 0.3, rely =0.4, anchor = 'center')
   choisir_long_mot.place(relx = 0.7, rely = 0.1, anchor= 'center')
@@ -153,7 +159,7 @@ def liste_de_longueurs():       #fonction qui permet à l'utilisateur de choisir
   combo_long = ttk.Combobox(theme_et_long, width = 20, state="readonly")
   combo_long.bind("<<ComboboxSelected>>",  sélection_long)
 
-def sélection_thème(event):     ##fonction qui permet de retourner le thème de mots choisi par l'utilisateur
+def sélection_thème(event):     #fonction qui permet de retourner le thème de mots choisi par l'utilisateur
   global thème
   thème = combo_themes.get()
   extraction_des_longueurs()
@@ -164,7 +170,7 @@ def sélection_long(event):       #fonction qui permet de retourner la longueur 
   global longueur  
   longueur = combo_long.get()
 
-def affich_combo_theme():
+def affich_combo_theme():         #fonction qui affiche le paramètre thème(pour les modes chrono et infini) 
     choisir_theme.place(relx = 0.5, rely = 0.1, anchor = 'center')
     combo_themes.place(relx= 0.5, rely =0.4, anchor = 'center')
 
@@ -188,30 +194,42 @@ def particularités_mot():
 #création de l'interface du jeu
     
 def transition():       #transition vers le jeu principal
-    global jeu
+    global jeu, Etapes, txt_score, score
     menu.destroy()
     jeu = tk.Frame(racine, bg="#282828", width = WIDTH, height = HEIGHT)
     jeu.pack()
+    Etapes = [etape1, etape2, etape3, etape4, etape5, etape6, etape7, etape8]
+    txt_score = tk.StringVar()
+    txt_score.set("00")
+    label_score = tk.Label(jeu, text = 'Votre Score est:', font = 'helvetica,40', fg = 'black', bg = 'white')
+    affichage_score = tk.Label(jeu, textvariable= txt_score, font = 'helvetica,26', fg = 'black')
+    label_score.place(relx = 0.8, rely = 0.2, anchor='center')
+    affichage_score.place(relx = 0.8, rely = 0.3, anchor='center')
+    score = 0
     particularités_mot()
     cadre_pendu()
     dessin_mot()
     clavier_lettres()
     nouvelle_partie()
-    particularités_mode()
     jeu.focus_set()
     jeu.bind("<KeyPress>", clavier_ordi)
-    
-        
+    particularités_mode()
+         
 def particularités_mode():
     if mode == 'Chrono':
+        score = 0
         chrono()
-
-
+        racine.after(1000,passage_temps)
+    if mode == 'Infini':
+        score = 0
+           
 def nouvelle_partie():          #permet de générer une nouvelle partie
-    global guesses, wrong_guesses, right_guesses
+    global guesses, wrong_guesses, right_guesses, alphabet_ordi
     dessin_pendu.delete('all')
+    alphabet_ordi = alphabet.copy()
     wrong_guesses= 0
     guesses = 0
+    score = 0
     particularités_mot()
     right_guesses = list(set(mot_séparé_normal))
     List_dash.config(text = ' '.join(["_" if letter!= ' ' else ' ' for letter in Mot]))
@@ -255,10 +273,11 @@ def dessin_mot():                   #Dessine les traits du mots qu'il faudra dev
     List_dash.place(in_=dessin, relx =0.5, rely = 0.5, anchor = 'center')
 
 def clavier_lettres():          #construit un clavier contenant des boutons pour chacune des 26 lettres de l'alphabet 
-    global alphabet, buttons
+    global alphabet, buttons, alphabet_ordi
     clavier = tk.Frame(jeu, bg="#282828", bd = 2, relief = 'sunken')
     clavier.place(relx = 0.5, rely = 0.88, anchor = 'center')
     alphabet = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+    alphabet_ordi = alphabet.copy()
     buttons = []
     for letter in alphabet:
             button = tk.Button(clavier, text=letter, font=("Helvetica", 18), bg="#333333", command = lambda letter = letter: lettre_check(letter), width=3, height=1 ,relief = 'raised')
@@ -271,7 +290,8 @@ def clavier_lettres():          #construit un clavier contenant des boutons pour
         buttons[20+i].grid(row = 2, column = i+3)
 
 def clavier_ordi(event):                     #vérifie si la lettre tapée sur l'ordinateur est bien dans le mot
-    if event.char.upper() in alphabet:
+    if event.char.upper() in alphabet_ordi:
+        alphabet_ordi.remove(event.char.upper())
         lettre_check(event.char.upper())
 
 #étapes du dessin du pendu
@@ -318,12 +338,12 @@ def lettre_check(lettre):             #Fonction qui vérifie si la lettre choisi
         right_guesses.remove(lettre)
         affichage_lettre(lettre)
         buttons[alphabet.index(lettre)].config(relief= 'sunken', bg="#93C572", state="disabled")
-        victoire()
+        victoire()    
     else:
         affichage_pendu()
         buttons[alphabet.index(lettre)].config(relief= 'sunken', bg="#FF5252", state="disabled")
         défaite()
-        
+
 def affichage_lettre(lettre):            #Fonction qui affiche une lettre correctement choisie
     global nouveau_texte
     for i in range(len(mot_séparé_normal)):   
@@ -333,26 +353,44 @@ def affichage_lettre(lettre):            #Fonction qui affiche une lettre correc
 
 def affichage_pendu():                 #Fonction qui affiche les membres du pendu
     global wrong_guesses, Etapes
-    Etapes = [etape1, etape2, etape3, etape4, etape5, etape6, etape7, etape8]
     Etapes[wrong_guesses]()
     wrong_guesses +=1
 
 def défaite():                          #Fonction qui affiche un message lorsque le joueur a perdu et lui demande s'il veut rejouer
+   if mode == 'Normal':
+        txt_score.set(f"{guesses:02d}")
    if wrong_guesses == len(Etapes):
-        resultat = messagebox.askquestion("Défaite", "Vous avez perdu! Le bon mot était " + Mot.upper() + ".\nSouhaitez-vous rejouer?")
-        if resultat == messagebox.YES:
-             nouvelle_partie()
-        else:
-             racine.destroy()
+        if mode =='Normal':
+            resultat = messagebox.askquestion("Défaite", "Vous avez perdu! Le bon mot était " + Mot.upper() + ".\nSouhaitez-vous rejouer?")
+            if resultat == messagebox.YES:
+                nouvelle_partie()
+            else:
+                racine.destroy()
+        elif mode =='Chrono':
+            nouvelle_partie()
+        elif mode =='Infini':
+            resultat = messagebox.askquestion("Défaite", "Vous avez perdu! Vous avez deviner un total de " + str(score) + "mots.\nSouhaitez-vous rejouer?")
+            if resultat == messagebox.YES:
+                nouvelle_partie()
+            else:
+                racine.destroy()
 
 def victoire():                         #Fonction qui affiche un message de victoire au joueur et lui demande s'il veut rejouer
+    global score
+    if mode == 'Normal':
+        txt_score.set(f"{guesses:02d}")
     if right_guesses == []:
-        resultat = messagebox.askquestion("Victoire", "Bien Joué, vous avez trouvé le mot et sauvé le pendu!\nSouhaitez-vous rejouer?")
-        if resultat == messagebox.YES:
-             nouvelle_partie()
+        if mode == 'Normal':
+            score = 1
+            resultat = messagebox.askquestion("Victoire", "Bien Joué, vous avez trouvé le mot et sauvé le pendu!\nSouhaitez-vous rejouer?")
+            if resultat == messagebox.YES:
+                nouvelle_partie()
+            else:
+                racine.destroy()
         else:
-             racine.destroy()
+            score+=1
+            txt_score.set(f"{score:02d}")
+            nouvelle_partie()
 
 menu_principal()
 racine.mainloop()
-
