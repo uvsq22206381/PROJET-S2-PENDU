@@ -5,9 +5,12 @@ from tkinter import messagebox
 
 # création d'une liste de mots à deviner
 
-themes   =    {'Animaux': ['chien', 'chat', 'lion', 'tigre', 'éléphant'],
-               'Fruits': ['pomme', 'banane', 'orange', 'kiwi', 'mangue'],
-               'Couleurs': ['rouge', 'bleu', 'vert', 'jaune', 'violet']}
+themes   =    { "Fruits": ["Abricot", "Ananas", "Banane", "Cassis", "Citron", "Clémentine", "Figue", "Fraise", "Framboise", "Grenade", "Groseille", "Kiwi", "Litchi", "Mangue", "Melon", "Myrtille", "Nectarine", "Orange", "Pamplemousse", "Papaye", "Pastèque", "Pêche", "Poire", "Pomelo", "Pomme", "Prune", "Raisin", "Rhubarbe", "Tomate"],
+                "Animaux": ["Aigle", "Baleine", "Bison", "Cerf", "Chameau", "Chien", "Chat", "Cochon", "Dauphin", "Écureuil", "Éléphant", "Furet", "Girafe", "Gorille", "Guépard", "Hippopotame", "Kangourou", "Koala", "Lapin", "Lion", "Loup", "Oiseau", "Ours", "Panda", "Poisson", "Poulet", "Renard", "Souris", "Tigre", "Zèbre"],
+                "Pays": ["Afghanistan", "Allemagne", "Argentine", "Australie", "Belgique", "Brésil", "Canada", "Chine", "Colombie", "Cuba", "Danemark", "Espagne", "Égypte", "Jordanie", "Finlande", "France", "Grèce", "Inde", "Indonésie", "Irlande", "Italie", "Japon", "Mexique", "Norvège", "Pérou", "Pologne", "Portugal", "Ouzbekistan", "Russie", "Suisse"],
+                "Métiers": ["Agriculteur", "Boulanger", "Charpentier", "Cuisinier", "Dentiste", "Facteur", "Garagiste", "Infirmier", "Jardinier", "Maçon", "Mécanicien", "Médecin", "Policier", "Pompier", "Serveur", "Soldat", "Tailleur", "Vétérinaire", "Menuisier", "Architecte", "Électricien", "Plombier", "Coiffeur", "Artiste", "Ingénieur", "Écrivain", "Musicien", "Acteur", "Athlète", "Journaliste"],
+                "Sports": ["Athlétisme", "Badminton", "Basketball", "Boxe", "Canoë", "Cyclisme", "Équitation", "Escalade", "Escrime", "Football", "Golf", "Gymnastique", "Handball", "Hockey", "Judo", "Karaté", "Natation", "Patinage", "Plongée", "Rugby", "Perche", "Ski", "Snowboard", "Surf", "Taekwondo", "Tennis", "Triathlon", "Volleyball", "Paddle", "Yoga"]
+}
 
 dict_accents =  {           #dictionnaire des lettres avec accents les plus courantes en francais 
         'à': 'a',
@@ -171,6 +174,52 @@ def particularités_mot():
     else:
         mot_caché_Autres()            
 
+def historique_des_scores():
+    global historique_normal, historique_chrono, historique_infini, max_score
+    max_score = []
+    if mode =='Normal':
+        historique_normal = []
+        max_score = []
+        sauvegarde = open('C:/PROJET PYTHON PENDU/PROJET-S2-PENDU/score_Normal.txt', 'r',  encoding='utf-8')
+        li = sauvegarde.readline()
+        while li.strip() != '':
+            historique_normal.append(int(li))
+            li = sauvegarde.readline()
+        sauvegarde.close()
+        for i in range(3):
+            max_score.append(max(historique_normal))
+            historique_normal.remove(max(historique_normal))
+    if mode =='Infini':
+        historique_infini = []
+        max_score = []
+        sauvegarde = open('C:/PROJET PYTHON PENDU/PROJET-S2-PENDU/score_Infini.txt', 'r',  encoding='utf-8')
+        li = sauvegarde.readline()
+        while li.strip() != '':
+            historique_infini.append(int(li))
+            li = sauvegarde.readline()
+        sauvegarde.close()
+        for i in range(3):
+            max_score.append(max(historique_infini))
+            historique_infini.remove(max(historique_infini))
+    if mode =='Chrono':
+        historique_chrono = []
+        sauvegarde = open('C:/PROJET PYTHON PENDU/PROJET-S2-PENDU/score_Chrono.txt', 'r',  encoding='utf-8')
+        li = sauvegarde.readline()
+        while li.strip() != '':
+            historique_chrono.append(int(li))
+            li = sauvegarde.readline()
+        sauvegarde.close()
+        for i in range(3):
+            max_score.append(max(historique_chrono))
+            historique_chrono.remove(max(historique_chrono))
+    title_label = tk.Label(jeu, text="Archive des Scores", font=("Helvetica", 20), bg = 'gray10', bd = 4, highlightbackground='black', highlightcolor='black')
+    title_label.place(relx=0.83, rely = 0.37, anchor='center')
+    table_score = tk.Frame(jeu, bg="#282828", bd=2, relief="groove")
+    table_score.place(relx = 0.83, rely = 0.55, anchor ='center')
+    for i in range(3):
+        score_label = tk.Label(table_score, text= str(i+1)+'-         ' + str(max_score[i]), font=("Helvetica", 14), bg="#232323", width=20, height=2, relief="groove")
+        score_label.pack(pady = 5)
+
 #création de l'interface du jeu
     
 def transition():       #transition vers le jeu principal
@@ -183,7 +232,7 @@ def transition():       #transition vers le jeu principal
     txt_score.set("00")
     score = 0
     cadre_score = tk.Frame(jeu, height = 150, width = 300, bd = 4, bg = '#282828', highlightbackground="#FAC051", highlightthickness=3, relief='solid')
-    cadre_score.place(relx = 0.83, rely= 0.3, anchor= 'center')
+    cadre_score.place(relx = 0.83, rely= 0.2, anchor= 'center')
     label_score = tk.Label(cadre_score, text = 'Votre Score est:', font = 'helvetica 24', fg = 'white', bg = '#282828', bd = 3, highlightbackground= 'black', relief='raised')
     affichage_score = tk.Label(cadre_score, textvariable= txt_score, font = 'helvetica 26 bold', fg = 'white', bg = '#282828', bd = 3, highlightbackground= 'black', relief='raised' )
     label_score.place(relx = 0.5, rely = 0.3, anchor='center')
@@ -193,6 +242,7 @@ def transition():       #transition vers le jeu principal
     retour_au_menu = tk.Button(jeu, text="Menu Principal", font=("Helvetica", 20, "bold"), fg="black", bg="#FAC051", command = retour_menu)
     retour_au_menu.place(relx = 0.15, rely = 0.88, anchor= 'center')
     score = 0
+    historique_des_scores()
     particularités_mot()
     cadre_pendu()
     dessin_mot()
