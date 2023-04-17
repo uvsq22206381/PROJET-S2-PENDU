@@ -181,6 +181,7 @@ def transition():       #transition vers le jeu principal
     Etapes = [etape1, etape2, etape3, etape4, etape5, etape6, etape7, etape8]
     txt_score = tk.StringVar()
     txt_score.set("00")
+    score = 0
     cadre_score = tk.Frame(jeu, height = 150, width = 300, bd = 4, bg = '#282828', highlightbackground="#FAC051", highlightthickness=3, relief='solid')
     cadre_score.place(relx = 0.83, rely= 0.3, anchor= 'center')
     label_score = tk.Label(cadre_score, text = 'Votre Score est:', font = 'helvetica 24', fg = 'white', bg = '#282828', bd = 3, highlightbackground= 'black', relief='raised')
@@ -202,10 +203,11 @@ def transition():       #transition vers le jeu principal
     particularités_mode()
 
 def chrono():               #création du chronomètre
-    global temps, texte_tps
-    temps = 120
+    global temps, texte_tps, timer_id
+    timer_id = None
+    temps = 60
     texte_tps = tk.StringVar()
-    texte_tps.set("02:00")
+    texte_tps.set("01:00")
     cercle = tk.Canvas(jeu, width=255, height=255, bg="#282828", bd=0, highlightthickness=0)
     cercle.place(relx = 0.17, rely = 0.3, anchor= 'center')
     cercle.create_oval((10, 10),(250, 250), outline="#FAC051", width=10)
@@ -218,28 +220,30 @@ def passage_temps():        #passage du temps au chrono
     minutes, seconds = temps//60, temps%60
     texte_tps.set(f"{minutes:02d}:{seconds:02d}")
     if temps == 0:
-        resultat = messagebox.askquestion("le temps est écoulé!, Vous avez réussi à sauver le pendu" + str(score) + "fois!\nSouhaitez-vous rejouer?")
+        resultat = messagebox.askquestion("Défaite", "le temps est écoulé!, Vous avez réussi à sauver le pendu " + str(score) + " fois!\nSouhaitez-vous rejouer?")
         if resultat == messagebox.YES:
+            if timer_id is not None:
+                racine.after_cancel(timer_id)
+            sauvegarde = open('C:/PROJET PYTHON PENDU/PROJET-S2-PENDU/score_Chrono.txt', 'a',  encoding='utf-8')
+            sauvegarde.write(str(score) + '\n')
+            sauvegarde.close()
+            score = 0
+            txt_score.set(f"{score:02d}")
             particularités_mode()
             racine.after_cancel(timer_id)
-        else:
-            racine.destroy()
     else:
         timer_id = racine.after(1000, passage_temps)
 
 def retour_menu():
-    global timer_id
     jeu.destroy()
     menu_principal()
-    racine.after_cancel(timer_id)
+    if timer_id is not None:
+        racine.after_cancel(timer_id)
 
 def particularités_mode():
     if mode == 'Chrono':
-        score = 0
         chrono()
         racine.after(1000,passage_temps)
-    if mode == 'Infini':
-        score = 0
            
 def nouvelle_partie():          #permet de générer une nouvelle partie
     global guesses, wrong_guesses, right_guesses, alphabet_ordi
@@ -375,26 +379,37 @@ def affichage_pendu():                 #Fonction qui affiche les membres du pend
     wrong_guesses +=1
 
 def défaite():                          #Fonction qui affiche un message lorsque le joueur a perdu et lui demande s'il veut rejouer
+   global score
    if mode == 'Normal':
         txt_score.set(f"{guesses:02d}")
    if wrong_guesses == len(Etapes):
         if mode =='Normal':
             resultat = messagebox.askquestion("Défaite", "Vous avez perdu! Le bon mot était " + Mot.upper() + ".\nSouhaitez-vous rejouer?")
             if resultat == messagebox.YES:
+                score = 0
                 nouvelle_partie()
         elif mode =='Chrono':
+            txt_score.set(f"{score:02d}")
             nouvelle_partie()
         elif mode =='Infini':
+            sauvegarde = open('C:/PROJET PYTHON PENDU/PROJET-S2-PENDU/score_Infini.txt', 'a',  encoding='utf-8')
+            sauvegarde.write(str(score) + '\n')
+            sauvegarde.close()
             resultat = messagebox.askquestion("Défaite", "Vous avez perdu! Vous avez deviné un total de " + str(score) + " mot(s).\nSouhaitez-vous rejouer?")
             if resultat == messagebox.YES:
+                score = 0
+                txt_score.set(f"{score:02d}")
                 nouvelle_partie()
             
 def victoire():                         #Fonction qui affiche un message de victoire au joueur et lui demande s'il veut rejouer
-    global score
+    global score, guesses
     if mode == 'Normal':
         txt_score.set(f"{guesses:02d}")
     if right_guesses == []:
         if mode == 'Normal':
+            sauvegarde = open('C:/PROJET PYTHON PENDU/PROJET-S2-PENDU/score_Normal.txt', 'a',  encoding='utf-8')
+            sauvegarde.write(str(guesses) + '\n')
+            sauvegarde.close()
             score = 1
             resultat = messagebox.askquestion("Victoire", "Bien Joué, vous avez trouvé le mot et sauvé le pendu!\nSouhaitez-vous rejouer?")
             if resultat == messagebox.YES:
